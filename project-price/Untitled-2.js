@@ -2,7 +2,7 @@
 function checkPriceFromMonitoring(params) {
 
     let basePrice = baseTbpPrice(params.cost, params.weight);
-    
+
     // Расчет базовой цены на ТБП
     // function baseTbpPrice(cost, weight) {
     //     let a = (cost * 1.1236) + (weight * 7.86);
@@ -107,7 +107,7 @@ function checkPriceFromMonitoring(params) {
         // [params.TBPrice, params.specialPrice] = checkPriceFromMonitoring({
         //     TBPrice, monitoringPrice, cost, weight, retailPrice, actualPrice, recommendedRetailPrice, storeFormat, baseTbpPrice
         // });
-        
+
         // Проверка цены из мониторинга
         if (params.actualPrice < params.recommendedRetailPrice) {
             params.specialPrice = true;
@@ -121,6 +121,7 @@ function checkPriceFromMonitoring(params) {
 
 
     }
+
     console.log(basePrice);
 }
 

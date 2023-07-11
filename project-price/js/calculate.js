@@ -1,36 +1,88 @@
-// Расчет базовой цены на ТБП
-function calculateBasicPrice(cost, weight) {
-    return Math.round(((cost * 1.1236) + weight/1000 * 7.86) * 100) / 100;
-}
-function watchItWithStorePrice(price, storeFormat, storePrice) {
-    if (storeFormat === "ВПРОК")
-        return storePrice * 0.9 * 0.9 < price ? storePrice * 0.9 * 0.9 * 0.995 : price;
-    return storePrice < price ? storePrice * 0.995 : price;
+class Calculate {
+    constructor(cost, weight, retailPrice, actualPrice, recommendedPrice, monitoringPrice, storeFormat) {
+        this.cost = cost
+        this.weight = weight
+        this.retailPrice = retailPrice
+        this.actualPrice = actualPrice
+        this.recommendedPrice = recommendedPrice
+        this.monitoringPrice = monitoringPrice
+        this.storeFormat = storeFormat
+    }
+
+//Расчет базовой цены на ТБП
+    calculateBasicPrice() {
+        return Math.round(((this.cost * 1.1236) + this.weight / 1000 * 7.86) * 100) / 100;
+    }
+
+    watchItWithStorePrice(price) {
+        if (this.storeFormat === "ВПРОК")
+            return this.retailPrice * 0.9 * 0.9 < price ? this.retailPrice * 0.9 * 0.9 * 0.995 : price;
+        return this.retailPrice < price ? this.retailPrice * 0.995 : price;
+    }
+
+
+    markup() {
+        return (this.cost !== 0 && this.retailPrice !== 0) ? this.cost * ((this.retailPrice / this.cost - 1.5) / 2.5) : 0
+    }
+
+    watchHighMargin(price) {
+        return this.retailPrice / this.cost - 1.5 > 0 ?
+            Math.min(this.storeFormat === "ВПРОК" ? this.retailPrice * 0.9 * 0.9 * 0.95 : this.retailPrice * 0.95, price) : price
+    }
+
+
+    watchLowMargin(price) {
+        return Math.max(price, this.actualPrice * 0.75);
+    }
+
+
+    watchItWithRecommendedPrice(price) {
+        if (this.recommendedPrice === 0)
+            return price
+        if (this.storeFormat !== 'ВПРОК')
+            return this.actualPrice * 0.9 <= this.recommendedPrice ? this.actualPrice * 0.9 * 0.995 : Math.max(price, this.recommendedPrice)
+        return this.actualPrice <= this.recommendedPrice ? this.actualPrice * 0.995 : Math.max(price, this.recommendedPrice)
+    }
+
+    watchItWithMonitoringPrice(price) {
+        if (this.monitoringPrice === 0 || this.monitoringPrice > price)
+            return price
+        return this.monitoringPrice >= this.cost * 1.05 ? this.monitoringPrice * 0.95 : this.monitoringPrice * 0.995
+    }
 }
 
-function markup(retailPrice, cost) {
-    return (cost !== 0 && retailPrice !== 0) ? cost * ((retailPrice / cost - 1.5) / 2.5) : 0
-}
+const res = new Calculate(96.23, 100, 229.9, 229.9, 0, 0, 'ЦИРКУЛЬ')
+let price = res.calculateBasicPrice();
 
-function watchHighMargin(price, storeFormat, retailPrice, cost) {
-    return retailPrice / cost - 1.5 > 0 ?
-        Math.min(storeFormat === "ВПРОК" ? retailPrice * 0.9 * 0.9 * 0.95 : retailPrice * 0.95, price) : price
-}
+// console.log('calculateBasicPrice', price);
 
-function watchLowMargin(price, actualPrice) {
-    return Math.max(price, actualPrice * 0.75);
-}
+price = res.watchItWithStorePrice(price);
 
-function watchItWithRecommendedPrice(price, storeFormat, actualPrice, recommendedPrice) {
-    if (recommendedPrice === 0)
-        return price
-    if (storeFormat !== 'ВПРОК')
-        return actualPrice*0.9 <= recommendedPrice ? actualPrice*0.9*0.995 : Math.max(price, recommendedPrice)
-    return actualPrice <= recommendedPrice ? actualPrice*0.995 : Math.max(price, recommendedPrice)
-}
+// console.log('watchItWithStorePrice', price);
 
-function watchItWithMonitoringPrice(price, cost, monitoringPrice) {
-    if (monitoringPrice === 0 || monitoringPrice > price)
-        return price
-    return monitoringPrice >= cost*1.05 ? monitoringPrice*0.95 : monitoringPrice*0.995
-}
+price = res.markup(price);
+
+// console.log('markup', price);
+
+price = res.watchHighMargin(price);
+
+// console.log('watchHighMargin', price);
+
+price = res.watchLowMargin(price);
+
+// console.log('watchLowMargin', price);
+
+price = res.watchItWithRecommendedPrice(price,);
+
+// console.log('watchItWithRecommendedPrice', price);
+
+price = res.watchItWithMonitoringPrice(price);
+
+console.log ('Final:', price);
+
+
+
+
+
+
+
